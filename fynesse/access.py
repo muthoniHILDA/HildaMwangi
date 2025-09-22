@@ -197,11 +197,15 @@ def plot_city_map(place_name, latitude, longitude, box_size_km=2, tags=None):
 import pandas as pd
 import numpy as np
 
-def load_and_clean_data(primary_path, secondary_path, tertiary_path):
+def load_and_clean_data(primary_path, secondary_path, tertiary_path,Primary_attendance_path, education_General_path, illiterate_path, school_age_path):
     # Load datasets
     df_primary = pd.read_csv(primary_path)
     df_secondary = pd.read_csv(secondary_path)
     df_tertiary = pd.read_csv(tertiary_path)
+    df_Primary_attendance=pd.read_csv(Primary_attendance_path)
+    df_education_General=pd.read_csv(education_General_path)
+    df_illiterate=pd.read_csv(illiterate_path)
+    df_school_age=pd.read_csv(school_age_path)
 
     # Merge datasets
     master = pd.concat([df_primary, df_secondary, df_tertiary], axis=1)
@@ -213,4 +217,69 @@ def load_and_clean_data(primary_path, secondary_path, tertiary_path):
     master = master.groupby("country").apply(lambda g: g.interpolate()).reset_index(drop=True)
 
     return master
+
+import pandas as pd
+import numpy as np
+
+def load_and_clean_data(file_paths: dict):
+    """
+    Load and clean multiple education-related tables, then merge into one master dataset.
+
+    Parameters
+    ----------
+    file_paths : dict
+        Dictionary with descriptive names as keys and CSV file paths as values.
+        Example:
+        {
+            "primary": "Primary.csv",
+            "secondary": "Secondary.csv",
+            "tertiary": "Tertiary.csv",
+            "literacy": "Literacy.csv",
+            "life_expectancy": "SchoolLifeExpectancy.csv",
+            "survival": "SurvivalRates.csv",
+            "out_school": "OutOfSchool.csv",
+            "age_population": "SchoolAgePopulation.csv",
+            "expenditure": "Expenditure.csv"
+        }
+
+    Returns
+    -------
+    master : pd.DataFrame
+        A merged dataframe with all cleaned indicators.
+    """
+
+    dataframes = []
+
+    for name, path in file_paths.items():
+        try:
+            df = pd.read_csv(path)
+
+            # Basic cleaning
+            df = df.replace(["#N/B", "NA", "N/A", ".."], np.nan)
+
+            # Ensure consistent column names
+            df = df.rename(columns=lambda x: x.strip().lower().replace(" ", "_"))
+
+            # Keep only country, year, and indicators
+            if "country" in df.columns and "year" in df.columns:
+                df = df.set_index(["country", "year"])
+            else:
+                raise ValueError(f"{name} table must contain 'country' and 'year' columns")
+
+            # Prefix columns by table name to avoid clashes
+            df = df.add_prefix(f"{name}_")
+
+            dataframes.append(df)
+
+        except Exception as e:
+            print(f"Error loading {name}: {e}")
+
+    # Merge all tables on country + year
+    master = pd.concat(dataframes, axis=1, join="outer").reset_index()
+
+    # Interpolate missing numeric values by country
+    master = master.groupby("country").apply(lambda g: g.interpolate()).reset_index(drop=True)
+
+    return master
+
 

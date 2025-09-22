@@ -192,3 +192,34 @@ def compute_gender_gaps(master_filled: pd.DataFrame, gap_pairs: dict):
             print(f"Skipped {gap_name}: missing columns")
     return master_filled
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+def cluster_gender_gaps(master_filled, gap_prefix="gap_", n_clusters=3, plot=True):
+    """
+    Cluster countries based on gender gap features using KMeans.
+    """
+    gap_cols = [col for col in master_filled.columns if gap_prefix in col]
+    X = master_filled[gap_cols].dropna()
+
+    # Standardize
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Fit KMeans
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+    clusters = kmeans.fit_predict(X_scaled)
+
+    # Assign clusters back
+    master_filled.loc[X.index, "cluster"] = clusters
+
+    # Optional visualization (first 2 features)
+    if plot and len(gap_cols) >= 2:
+        plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=clusters, cmap="viridis")
+        plt.xlabel(gap_cols[0])
+        plt.ylabel(gap_cols[1])
+        plt.title("Clustering of Countries by Gender Gaps")
+        plt.show()
+
+    return master_filled, kmeans

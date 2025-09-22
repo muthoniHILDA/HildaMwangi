@@ -166,7 +166,7 @@ def compute_gender_gaps(master_filled: pd.DataFrame, gap_pairs: dict):
 
 import pandas as pd
 
-def compute_gender_gaps(master_filled: pd.DataFrame, gap_pairs: dict):
+def compute_gender_gap(master_filled: pd.DataFrame, gap_pairs: dict):
     """
     Compute gender gaps (female - male) for a given set of column pairs.
 

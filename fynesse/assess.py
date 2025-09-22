@@ -111,3 +111,28 @@ def view(data: Union[pd.DataFrame, Any]) -> None:
 def labelled(data: Union[pd.DataFrame, Any]) -> Union[pd.DataFrame, Any]:
     """Provide a labelled set of data ready for supervised learning."""
     raise NotImplementedError
+
+import pandas as pd
+
+def compute_gender_gaps(df, female_col, male_col, prefix):
+    """
+    Compute gender gap and parity index for a given male/female column pair.
+    
+    Parameters
+    ----------
+    df : DataFrame
+    female_col : str
+        Column name for female values
+    male_col : str
+        Column name for male values
+    prefix : str
+        Prefix to use for new columns (e.g. 'primary_enrol')
+    """
+    df[female_col] = pd.to_numeric(df[female_col], errors="coerce")
+    df[male_col] = pd.to_numeric(df[male_col], errors="coerce")
+    
+    df[f"gap_{prefix}"] = df[female_col] - df[male_col]
+    df[f"gpi_{prefix}"] = df[female_col] / df[male_col]
+    
+    return df
+

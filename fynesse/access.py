@@ -282,4 +282,37 @@ def load_and_clean_data(file_paths: dict):
 
     return master
 
+import pandas as pd
+
+def load_datasets(base_path="."):
+    df_primary = pd.read_csv(f"{base_path}/Primary Education.csv")
+    df_secondary = pd.read_csv(f"{base_path}/Secondary Education.csv")
+    df_tertiary = pd.read_csv(f"{base_path}/Tertiary Education.csv")
+    df_Primary_attendance = pd.read_csv(f"{base_path}/Primary Education Attendance.csv")
+    df_education_General = pd.read_csv(f"{base_path}/Education in General.csv")
+    df_illiterate = pd.read_csv(f"{base_path}/Illiterate Population.csv")
+    df_school_age = pd.read_csv(f"{base_path}/School Age Population.csv")
+
+    datasets = {
+        "Primary": df_primary,
+        "Secondary": df_secondary,
+        "Tertiary": df_tertiary,
+        "Primary Attendance": df_Primary_attendance,
+        "Education General": df_education_General,
+        "Illiterate": df_illiterate,
+        "School Age": df_school_age
+    }
+    return datasets
+
+
+def inspect_datasets(datasets):
+    """Print basic info and missingness for each dataset."""
+    for name, df in datasets.items():
+        print(f"\n{name} dataset")
+        print(df.shape)
+        print(df.columns)
+        print(df.info())
+        print(df.isna().mean().sort_values(ascending=False).head(10))
+
+
 

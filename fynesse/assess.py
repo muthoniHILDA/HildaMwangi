@@ -223,3 +223,41 @@ def cluster_gender_gaps(master_filled, gap_prefix="gap_", n_clusters=3, plot=Tru
         plt.show()
 
     return master_filled, kmeans
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error
+import numpy as np
+
+def regression_model(master_filled, target="gap_primary_enrolment", exclude_features=None):
+    """
+    Train and evaluate a linear regression model to predict a gender gap.
+    """
+    if exclude_features is None:
+        exclude_features = [target, "year", "cluster"]
+
+    numeric_cols = master_filled.select_dtypes(include=np.number).columns.tolist()
+    features = [col for col in numeric_cols if col not in exclude_features]
+
+    df_model = master_filled.dropna(subset=features + [target])
+    if df_model.shape[0] == 0:
+        print("No data available after dropping rows with missing values.")
+        return None, None
+
+    X = df_model[features]
+    y = df_model[target]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    metrics = {
+        "R2": r2_score(y_test, y_pred),
+        "RMSE": np.sqrt(mean_squared_error(y_test, y_pred)),
+        "Coefficients": dict(zip(features, model.coef_))
+    }
+
+    return model, metrics
+

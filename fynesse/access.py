@@ -415,25 +415,6 @@ RENAME_MAPS = {
     }
 }
 
-def standardize_table(df, name):
-    """Standardize Country/Year and cast year to int"""
-    if "Country" in df.columns:
-        df = df.rename(columns={"Country": "country"})
-    if "Year" in df.columns:
-        df = df.rename(columns={"Year": "year"})
-        df["year"] = df["year"].astype(int)
-    return df
-
-def load_and_standardize(file_paths: dict):
-    """
-    Load CSVs and standardize country/year columns.
-    """
-    datasets = {}
-    for name, path in file_paths.items():
-        df = pd.read_csv(path)
-        df = standardize_table(df, name)
-        datasets[name] = df
-    return datasets
 
 def rename_columns(datasets: dict):
     """

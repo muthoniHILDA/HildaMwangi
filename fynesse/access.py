@@ -314,5 +314,33 @@ def inspect_datasets(datasets):
         print(df.info())
         print(df.isna().mean().sort_values(ascending=False).head(10))
 
+import pandas as pd
+
+def standardize_table(df, name):
+    """
+    Standardize column names and ensure 'year' is integer.
+    """
+    if "Country" in df.columns:
+        df = df.rename(columns={"Country": "country"})
+    if "Year" in df.columns:
+        df = df.rename(columns={"Year": "year"})
+        df["year"] = df["year"].astype(int)
+    else:
+        raise ValueError(f"Table {name} does not contain Year column")
+    return df
+
+
+def load_and_standardize(file_paths: dict):
+    """
+    Load multiple CSVs and standardize country/year columns.
+    """
+    datasets = {}
+    for name, path in file_paths.items():
+        df = pd.read_csv(path)
+        df = standardize_table(df, name)
+        datasets[name] = df
+    return datasets
+
+
 
 

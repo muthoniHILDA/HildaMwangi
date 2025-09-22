@@ -381,6 +381,70 @@ def rename_columns(datasets):
         renamed[name] = df
     return renamed
 
+import pandas as pd
+
+# Column rename mappings
+RENAME_MAPS = {
+    "Primary": {
+        "Enrolment Male (%)": "enrol_primary_male",
+        "Enrolment Female (%)": "enrol_primary_female"
+    },
+    "Secondary": {
+        "Enrolment Male (%)": "enrol_secondary_male",
+        "Enrolment Female (%)": "enrol_secondary_female"
+    },
+    "Tertiary": {
+        "Enrolment Male (%)": "enrol_tertiary_male",
+        "Enrolment Female (%)": "enrol_tertiary_female"
+    },
+    "Primary_Attendance": {
+        "Attendance Rate Male (%)": "attendance_primary_male",
+        "Attendance Rate Female (%)": "attendance_primary_female"
+    },
+    "Education_General": {
+        "Enrolment Male (%)": "enrol_general_male",
+        "Enrolment Female (%)": "enrol_general_female"
+    },
+    "Illiterate": {
+        "Illiterate Male (%)": "illiterate_male",
+        "Illiterate Female (%)": "illiterate_female"
+    },
+    "School_Age": {
+        "School Age Male (%)": "school_age_male",
+        "School Age Female (%)": "school_age_female"
+    }
+}
+
+def standardize_table(df, name):
+    """Standardize Country/Year and cast year to int"""
+    if "Country" in df.columns:
+        df = df.rename(columns={"Country": "country"})
+    if "Year" in df.columns:
+        df = df.rename(columns={"Year": "year"})
+        df["year"] = df["year"].astype(int)
+    return df
+
+def load_and_standardize(file_paths: dict):
+    """
+    Load CSVs and standardize country/year columns.
+    """
+    datasets = {}
+    for name, path in file_paths.items():
+        df = pd.read_csv(path)
+        df = standardize_table(df, name)
+        datasets[name] = df
+    return datasets
+
+def rename_columns(datasets: dict):
+    """
+    Apply harmonized column names to each dataset based on RENAME_MAPS.
+    """
+    renamed = {}
+    for name, df in datasets.items():
+        if name in RENAME_MAPS:
+            df = df.rename(columns=RENAME_MAPS[name])
+        renamed[name] = df
+    return renamed
 
 
 

@@ -104,3 +104,98 @@ def analyze_data(data: Union[pd.DataFrame, Any]) -> dict[str, Any]:
         logger.error(f"Error during data analysis: {e}")
         print(f"Error analyzing data: {e}")
         return {"error": str(e)}
+        import pandas as pd
+import matplotlib.pyplot as plt
+
+def interpret_clusters(clustered_data, cluster_col="cluster"):
+    """
+    Summarize cluster profiles and print key findings.
+
+    Parameters
+    ----------
+    clustered_data : pd.DataFrame
+        Dataset that includes a 'cluster' column.
+    cluster_col : str
+        The name of the cluster column.
+
+    Returns
+    -------
+    summary : pd.DataFrame
+        Cluster-level averages of indicators.
+    """
+    if cluster_col not in clustered_data.columns:
+        raise ValueError(f"{cluster_col} not found in dataframe")
+
+    summary = clustered_data.groupby(cluster_col).mean(numeric_only=True)
+    print("Cluster Profiles (averages of indicators):\n")
+    print(summary)
+
+    return summary
+
+
+def policy_recommendations(results):
+    """
+    Generate a set of policy recommendations based on regression or summary results.
+
+    Parameters
+    ----------
+    results : dict
+        Dictionary containing key variables and their effects.
+
+    Returns
+    -------
+    recs : list
+        List of recommendations as strings.
+    """
+    recs = []
+
+    # Example rules (you can expand)
+    if results.get("rural_population", 0) > 0.5:
+        recs.append("Invest in rural school infrastructure and digital inclusion.")
+
+    if results.get("poverty_rate", 0) > 0.4:
+        recs.append("Implement conditional cash transfers for girls' education.")
+
+    if results.get("internet_penetration", 0) < 0.3:
+        recs.append("Expand internet connectivity programs in underserved areas.")
+
+    if results.get("teacher_female_ratio", 0) < 0.3:
+        recs.append("Recruit and support more female teachers to encourage girls’ enrolment.")
+
+    if not recs:
+        recs.append("Maintain current policies but monitor gender gaps regularly.")
+
+    return recs
+
+
+def plot_gender_gap_trends(master_filled, gap_col="gender_gap_primary_enrolment"):
+    """
+    Plot temporal trends of gender gaps for multiple countries.
+
+    Parameters
+    ----------
+    master_filled : pd.DataFrame
+        Dataset with country, year, and gender gap column.
+    gap_col : str
+        Column name of the gender gap indicator.
+
+    Returns
+    -------
+    None
+    """
+    if gap_col not in master_filled.columns:
+        raise ValueError(f"{gap_col} not found in dataframe")
+
+    plt.figure(figsize=(12, 6))
+
+    for country in master_filled["country"].unique():
+        data = master_filled[master_filled["country"] == country]
+        plt.plot(data["year"], data[gap_col], label=country, alpha=0.5)
+
+    plt.title(f"{gap_col.replace('_', ' ').title()} Over Time")
+    plt.xlabel("Year")
+    plt.ylabel("Gender Gap (Female - Male)")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize="small")
+    plt.tight_layout()
+    plt.show()
+

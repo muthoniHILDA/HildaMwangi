@@ -193,3 +193,24 @@ def plot_city_map(place_name, latitude, longitude, box_size_km=2, tags=None):
     except Exception as e:
         print(f"An error occurred while plotting the map: {e}")
         print(f"Could not plot map for {place_name} at ({latitude}, {longitude}) with box size {box_size_km} km.")
+
+import pandas as pd
+import numpy as np
+
+def load_and_clean_data(primary_path, secondary_path, tertiary_path):
+    # Load datasets
+    df_primary = pd.read_csv(primary_path)
+    df_secondary = pd.read_csv(secondary_path)
+    df_tertiary = pd.read_csv(tertiary_path)
+
+    # Merge datasets
+    master = pd.concat([df_primary, df_secondary, df_tertiary], axis=1)
+
+    # Replace junk values
+    master = master.replace("#N/B", np.nan)
+
+    # Interpolate missing values within each country
+    master = master.groupby("country").apply(lambda g: g.interpolate()).reset_index(drop=True)
+
+    return master
+

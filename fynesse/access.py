@@ -394,5 +394,37 @@ def rename_columns(datasets: dict):
         renamed[name] = df
     return renamed
 
+import pandas as pd
+from functools import reduce
+
+def merge_datasets(datasets: dict):
+    """
+    Merge multiple standardized education datasets into one master dataframe.
+    
+    Parameters
+    ----------
+    datasets : dict
+        Dictionary of named datasets (each must have 'country' and 'year' cols).
+    
+    Returns
+    -------
+    master : pd.DataFrame
+        Combined dataset with all indicators.
+    """
+    dfs = list(datasets.values())
+    
+    # Drop ISO_Code from all except the first one (to avoid duplicates)
+    dfs_cleaned = [dfs[0]] + [
+        df.drop("ISO_Code", axis=1) if "ISO_Code" in df.columns else df
+        for df in dfs[1:]
+    ]
+    
+    master = reduce(
+        lambda left, right: pd.merge(left, right, on=["country", "year"], how="outer"),
+        dfs_cleaned
+    )
+    
+    return master
+
 
 

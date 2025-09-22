@@ -136,3 +136,31 @@ def compute_gender_gaps(df, female_col, male_col, prefix):
     
     return df
 
+import pandas as pd
+
+def compute_gender_gaps(master_filled: pd.DataFrame, gap_pairs: dict):
+    """
+    Compute gender gaps (female - male) for a given set of column pairs.
+
+    Parameters
+    ----------
+    master_filled : pd.DataFrame
+        The merged dataset with gender-disaggregated columns.
+    gap_pairs : dict
+        Dictionary mapping gap_name -> (female_col, male_col).
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with new gap columns added.
+    """
+    for gap_name, (female_col, male_col) in gap_pairs.items():
+        if female_col in master_filled.columns and male_col in master_filled.columns:
+            master_filled[gap_name] = (
+                pd.to_numeric(master_filled[female_col], errors="coerce") -
+                pd.to_numeric(master_filled[male_col], errors="coerce")
+            )
+        else:
+            print(f"Skipped {gap_name}: missing columns")
+    return master_filled
+

@@ -104,21 +104,52 @@ def analyze_data(data: Union[pd.DataFrame, Any]) -> dict[str, Any]:
         logger.error(f"Error during data analysis: {e}")
         print(f"Error analyzing data: {e}")
         return {"error": str(e)}
+        
+  import pandas as pd
+import matplotlib.pyplot as plt
+
+
+def interpret_clusters(clustered_data, cluster_col="cluster"):
+    """
+    Summarize cluster profiles and print key findings.
+    """
+    if cluster_col not in clustered_data.columns:
+        raise ValueError(f"{cluster_col} not found in dataframe")
+
+    summary = clustered_data.groupby(cluster_col).mean(numeric_only=True)
+    print("Cluster Profiles (averages of indicators):\n")
+    print(summary)
+    return summary
+
+
+def policy_recommendations(results):
+    """
+    Generate a set of policy recommendations based on regression or summary results.
+    """
+    recs = []
+
+    if results.get("rural_population", 0) > 0.5:
+        recs.append("Invest in rural school infrastructure and digital inclusion.")
+
+    if results.get("poverty_rate", 0) > 0.4:
+        recs.append("Implement conditional cash transfers for girls' education.")
+
+    if results.get("internet_penetration", 0) < 0.3:
+        recs.append("Expand internet connectivity programs in underserved areas.")
+
+    if results.get("teacher_female_ratio", 0) < 0.3:
+        recs.append("Recruit and support more female teachers to encourage girls’ enrolment.")
+
+    if not recs:
+        recs.append("Maintain current policies but monitor gender gaps regularly.")
+
+    return recs
+
+
 def plot_gender_gap_trends(master_filled, gap_col="gender_gap_secondary_enrolment", group_by_region=False):
     """
     Plot temporal trends of gender gaps for multiple countries or regions.
-
-    Parameters
-    ----------
-    master_filled : pd.DataFrame
-        Dataset with country, year, and gender gap column.
-    gap_col : str
-        Column name of the gender gap indicator.
-    group_by_region : bool
-        If True, aggregate by region instead of individual countries.
     """
-    import matplotlib.pyplot as plt
-
     if gap_col not in master_filled.columns:
         raise ValueError(f"{gap_col} not found in dataframe")
 
@@ -132,13 +163,15 @@ def plot_gender_gap_trends(master_filled, gap_col="gender_gap_secondary_enrolmen
     else:
         for country in master_filled["country"].unique():
             data = master_filled[master_filled["country"] == country]
-            plt.plot(data["year"], data[gap_col] / 1000, label=country, alpha=0.4)  # scale down
+            plt.plot(data["year"], data[gap_col] / 1000, label=country, alpha=0.4)
 
     plt.title(f"{gap_col.replace('_', ' ').title()} Over Time")
     plt.xlabel("Year")
-    plt.ylabel("Gender Gap (Female - Male, in Thousands)")
+    plt.ylabel("Gender Gap (Female - Male, scaled)")
     plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize="x-small", ncol=2)
     plt.tight_layout()
     plt.show()
 
+     
+   
 

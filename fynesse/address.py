@@ -105,7 +105,7 @@ def analyze_data(data: Union[pd.DataFrame, Any]) -> dict[str, Any]:
         print(f"Error analyzing data: {e}")
         return {"error": str(e)}
         
-  import pandas as pd
+import pandas as pd
 import matplotlib.pyplot as plt
 
 

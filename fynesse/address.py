@@ -104,7 +104,7 @@ def analyze_data(data: Union[pd.DataFrame, Any]) -> dict[str, Any]:
         logger.error(f"Error during data analysis: {e}")
         print(f"Error analyzing data: {e}")
         return {"error": str(e)}
-      def plot_gender_gap_trends(master_filled, gap_col="gender_gap_secondary_enrolment", group_by_region=False):
+def plot_gender_gap_trends(master_filled, gap_col="gender_gap_secondary_enrolment", group_by_region=False):
     """
     Plot temporal trends of gender gaps for multiple countries or regions.
 
